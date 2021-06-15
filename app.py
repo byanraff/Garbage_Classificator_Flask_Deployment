@@ -27,23 +27,23 @@ app = Flask(__name__)
 # Check https://keras.io/applications/
 # or https://www.tensorflow.org/api_docs/python/tf/keras/applications
 
-from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2
-model = MobileNetV2(weights='imagenet')
+#from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2
+#model = MobileNetV2(weights='imagenet')
 
-print('Model loaded. Check http://127.0.0.1:5000/')
+#print('Model loaded. Check http://127.0.0.1:5000/')
 
 
 # Model saved with Keras model.save()
-MODEL_PATH = 'models/your_model.h5'
+MODEL_PATH = '/home/raff/keras-flask-deploy-webapp/keras-flask-deploy-webapp/models/1stClassificator_88.h5'
 
 # Load your own trained model
-# model = load_model(MODEL_PATH)
-# model._make_predict_function()          # Necessary
-# print('Model loaded. Start serving...')
+model = load_model(MODEL_PATH)
+#model._make_predict_function()          # Necessary
+print('Model loaded. Start serving...')
 
 
 def model_predict(img, model):
-    img = img.resize((224, 224))
+    img = img.resize((300, 300))
 
     # Preprocessing the image
     x = image.img_to_array(img)
@@ -77,14 +77,29 @@ def predict():
         preds = model_predict(img, model)
 
         # Process your result for human
-        pred_proba = "{:.3f}".format(np.amax(preds))    # Max probability
-        pred_class = decode_predictions(preds, top=1)   # ImageNet Decode
+        #pred_proba = "{:.3f}".format(np.amax(preds))    # Max probability
+        #pred_class = decode_predictions(preds, top=1)   # ImageNet Decode
 
-        result = str(pred_class[0][0][1])               # Convert to string
-        result = result.replace('_', ' ').capitalize()
-        
+        #result = str(pred_class[0][0][1])               # Convert to string
+        #result = result.replace('_', ' ').capitalize()
+        print(preds)
+        #preds = preds.astype(int)
+        #new_preds = preds.tolist()
+        idx = np.argmax(preds)
+
+
+        switcher = {
+        0: "cardboard",
+        1: "glass",
+        2: "metal",
+        3: "paper",
+        4: "plastic",
+        5: "trash",
+    }
+        result = switcher.get(idx, "Cannot detected")
+
         # Serialize the result, you can add additional fields
-        return jsonify(result=result, probability=pred_proba)
+        return jsonify(result=result, probability= None)
 
     return None
 
